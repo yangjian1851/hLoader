@@ -20,12 +20,6 @@ string convert_ASCII(string hex);
 string hexedoc;
 
 
-struct Param
-{
-    string hexstring;
-};
-
-
 class CURLClass
 {
 private:
@@ -200,6 +194,7 @@ GO_ON:
         string response = client.Get(URL);
         Configure* configure = new Configure(response);
         configure->Selector();
+        return 0;
     }
     catch (exception e)
     {
